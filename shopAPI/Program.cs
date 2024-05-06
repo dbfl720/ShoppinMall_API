@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using shopAPI;
 using shopAPI.Data;
 using shopAPI.Repository;
 using shopAPI.Repository.IRepository;
@@ -14,6 +15,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
 });
+
+// AutoMapper 
+builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();

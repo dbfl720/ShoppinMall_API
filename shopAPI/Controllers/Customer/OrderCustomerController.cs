@@ -28,7 +28,7 @@ namespace shopAPI.Controllers.Customer
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-		public ActionResult<string> Checkout([FromBody] OrderCustomerRequestDTO orderRequestDTO)
+		public async Task<ActionResult<string>> Checkout([FromBody] OrderCustomerRequestDTO orderRequestDTO)
 		{
 			if (orderRequestDTO == null)
 			{
@@ -66,8 +66,8 @@ namespace shopAPI.Controllers.Customer
 				};
 
 				// Add order to database
-				_db.Order.Add(order);
-				_db.SaveChanges();
+				await _db.Order.AddAsync(order);
+				await _db.SaveChangesAsync();
 
 
 				// Save order details
@@ -83,10 +83,10 @@ namespace shopAPI.Controllers.Customer
 						UpdateAt = DateTime.Now
 					};
 
-					_db.OrderDetails.Add(orderDetail);
+					await _db.OrderDetails.AddAsync(orderDetail);
 				}
 
-				_db.SaveChanges();
+				await _db.SaveChangesAsync();
 
 
 				// Return success message with order code

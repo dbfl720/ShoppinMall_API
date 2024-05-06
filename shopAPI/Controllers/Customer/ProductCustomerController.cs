@@ -24,7 +24,7 @@ namespace shopAPI.Controllers.Customer
 
 		[HttpGet]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public ActionResult<IEnumerable<ProductCustomerGetDTO>> GetProduct()  //여러개 파라미터 받기 
+		public async Task<ActionResult<IEnumerable<ProductCustomerGetDTO>>> GetProduct()  //여러개 파라미터 받기 
 		{
 			var products = _db.Product.Select(p => new ProductCustomerGetDTO
 			{

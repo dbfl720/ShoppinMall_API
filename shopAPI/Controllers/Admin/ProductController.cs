@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using shopAPI.Data;
 using shopAPI.Models;
 using shopAPI.Models.Dto.AdminDto;
@@ -29,9 +30,9 @@ namespace shopAPI.Controllers.Admin
 		[Authorize(Roles = "admin")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-		public ActionResult<IEnumerable<ProductDTO>> GetProduct()  //여러개 파라미터 받기 
+		public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProduct()  //여러개 파라미터 받기 
 		{
-			return Ok(_db.Product.ToList());
+			return Ok(await _db.Product.ToListAsync());
 		}
 
 
@@ -70,12 +71,12 @@ namespace shopAPI.Controllers.Admin
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-		public ActionResult<ProductDTO> CreateProduct([FromBody] ProductDTO productDTO)
+		public async Task<ActionResult<ProductDTO>> CreateProduct([FromBody] ProductDTO productDTO)
 		{
 
 
 			// Uniqe name
-			if (_db.Product.FirstOrDefault(u => u.ProductName.ToLower() == productDTO.ProductName.ToLower()) != null)
+			if (await _db.Product.FirstOrDefaultAsync(u => u.ProductName.ToLower() == productDTO.ProductName.ToLower()) != null)
 			{
 				ModelState.AddModelError("CustomError", "Product name already exists!");
 				return BadRequest(ModelState);
@@ -105,8 +106,8 @@ namespace shopAPI.Controllers.Admin
 			};
 
 
-			_db.Product.Add(model);
-			_db.SaveChanges();
+			await _db.Product.AddAsync(model);
+			await _db.SaveChangesAsync();
 
 			//return Ok(productDTO);
 			return CreatedAtAction(nameof(CreateProduct), productDTO);
@@ -125,14 +126,14 @@ namespace shopAPI.Controllers.Admin
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-		public IActionResult DeleteProduct(int id)  // return 타입이 no content일 경우에는 IActionResult 쓰기 
+		public async Task<IActionResult> DeleteProduct(int id)  // return 타입이 no content일 경우에는 IActionResult 쓰기 
 		{
 			if (id == 0)
 			{
 				return BadRequest();
 			}
 
-			var product = _db.Product.FirstOrDefault(u => u.Id == id);
+			var product = await _db.Product.FirstOrDefaultAsync(u => u.Id == id);
 
 			if (product == null)
 			{
@@ -140,7 +141,7 @@ namespace shopAPI.Controllers.Admin
 			}
 
 			_db.Product.Remove(product);
-			_db.SaveChanges();
+			await _db.SaveChangesAsync();
 			return NoContent();
 		}
 
@@ -155,7 +156,7 @@ namespace shopAPI.Controllers.Admin
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-		public IActionResult UpdateProduct(int id, [FromBody] ProductDTO productDTO)
+		public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductDTO productDTO)
 		{
 			if (productDTO == null || id != productDTO.Id)
 			{
@@ -180,7 +181,7 @@ namespace shopAPI.Controllers.Admin
 			existingProduct.UpdateAt = DateTime.Now;
 
 			// 데이터베이스에 변경사항을 저장
-			_db.SaveChanges();
+			await _db.SaveChangesAsync();
 
 
 			return NoContent();
@@ -197,7 +198,7 @@ namespace shopAPI.Controllers.Admin
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		public IActionResult UpdateProduct(int id, [FromBody] JsonPatchDocument<ProductDTO> patchDTO)
+		public async Task<IActionResult> UpdateProduct(int id, [FromBody] JsonPatchDocument<ProductDTO> patchDTO)
 		{
 			if (patchDTO == null || id == 0)
 			{
@@ -205,7 +206,7 @@ namespace shopAPI.Controllers.Admin
 			}
 
 			//var product = _db.Product.AsNoTracking().FirstOrDefault(u => u.Id == id);
-			var product = _db.Product.FirstOrDefault(u => u.Id == id);
+			var product = await _db.Product.FirstOrDefaultAsync(u => u.Id == id);
 
 
 			if (product == null)
@@ -241,7 +242,7 @@ namespace shopAPI.Controllers.Admin
 			product.ProductDescription = productDTO.ProductDescription;
 			product.ProductImage = productDTO.ProductImage;
 
-			_db.SaveChanges();
+			await _db.SaveChangesAsync();
 
 
 

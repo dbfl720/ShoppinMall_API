@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using shopAPI.Data;
 using shopAPI.Models.Dto.CutomerDto;
 
@@ -26,7 +27,7 @@ namespace shopAPI.Controllers.Customer
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-		public ActionResult<string> Lookup([FromBody] LookupCustomerReqeustDTO lookupRequestDTO)
+		public async Task<ActionResult<string>> Lookup([FromBody] LookupCustomerReqeustDTO lookupRequestDTO)
 		{
 			if (lookupRequestDTO == null)
 			{
@@ -45,7 +46,7 @@ namespace shopAPI.Controllers.Customer
 								 OrderDetail = orderDetail
 							 };
 
-			var orderData = orderQuery.FirstOrDefault();
+			var orderData = await orderQuery.FirstOrDefaultAsync();
 
 			if (orderData == null)
 			{

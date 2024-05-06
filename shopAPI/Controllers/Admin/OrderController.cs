@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using shopAPI.Data;
 using shopAPI.Models.Dto.AdminDto;
 using shopAPI.Models.Dto.CutomerDto;
@@ -31,9 +32,9 @@ namespace shopAPI.Controllers.Admin
 		[Authorize(Roles = "admin")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-		public ActionResult<IEnumerable<OrderGetDTO>> GetOrder()  //여러개 파라미터 받기 
+		public async Task<ActionResult<IEnumerable<OrderGetDTO>>> GetOrder()  //여러개 파라미터 받기 
 		{
-			return Ok(_db.Order.ToList());
+			return Ok(await _db.Order.ToListAsync());
 		}
 
 
@@ -49,7 +50,7 @@ namespace shopAPI.Controllers.Admin
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-		public ActionResult<string> ViewOrders([FromBody] LookupCustomerReqeustDTO lookupRequestDTO)
+		public async Task<ActionResult<string>> ViewOrders([FromBody] LookupCustomerReqeustDTO lookupRequestDTO)
 		{
 			if (lookupRequestDTO == null)
 			{
@@ -68,7 +69,7 @@ namespace shopAPI.Controllers.Admin
 								 OrderDetail = orderDetail
 							 };
 
-			var orderData = orderQuery.FirstOrDefault();
+			var orderData = await orderQuery.FirstOrDefaultAsync();
 
 			if (orderData == null)
 			{
@@ -118,7 +119,7 @@ namespace shopAPI.Controllers.Admin
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-		public IActionResult UpdateOrderStatus(int id, [FromBody] JsonPatchDocument<OrderPatchRequestDTO> patchDTO)
+		public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] JsonPatchDocument<OrderPatchRequestDTO> patchDTO)
 		{
 			if (patchDTO == null || id == 0)
 			{
@@ -128,7 +129,7 @@ namespace shopAPI.Controllers.Admin
 
 
 
-			var order = _db.Order.FirstOrDefault(o => o.Id == id);
+			var order = await _db.Order.FirstOrDefaultAsync(o => o.Id == id);
 
 			if (order == null)
 			{
@@ -169,7 +170,7 @@ namespace shopAPI.Controllers.Admin
 
 
 			// db저장 
-			_db.SaveChanges();
+			await _db.SaveChangesAsync();
 
 
 			return NoContent();
